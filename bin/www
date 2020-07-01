@@ -37,9 +37,9 @@ const onError = error => {
     throw error;
   }
 
-  const bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  const bind = typeof port === 'string' ?
+    'Pipe ' + port :
+    'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -62,9 +62,9 @@ const onError = error => {
 
 const onListening = () => {
   const addr = server.address();
-  const bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  const bind = typeof addr === 'string' ?
+    'pipe ' + addr :
+    'port ' + addr.port;
   debug('Listening on ' + bind);
 }
 
@@ -96,11 +96,19 @@ io.on('connection', (socket) => {
       io.to(TOKEN).emit('open', {
         message: '建立房间成功',
         status: 200,
-        data: { room: socket.id }
+        data: {
+          room: socket.id
+        }
       })
       socket.on('disconnect', () => {
         delete rooms[TOKEN];
-        io.to(TOKEN).emit('open', { status: 500, message: '面试官已关闭房间', data: { examiner: '' } });
+        io.to(TOKEN).emit('open', {
+          status: 500,
+          message: '面试官已关闭房间',
+          data: {
+            examiner: ''
+          }
+        });
       })
       socket.on('question', question => {
         io.to(TOKEN).emit('question', question)
@@ -122,15 +130,27 @@ io.on('connection', (socket) => {
           codes: rooms[query.token].codes
         }
       })
+      socket.on("visibility", status => {
+        io.to(TOKEN).emit('visibility', status)
+      })
       socket.on('examinee', code => {
         io.to(TOKEN).emit('examinee', code)
       })
       socket.on('disconnect', () => {
         if (rooms[TOKEN]) rooms[query.token].examinee = '';
-        io.to(TOKEN).emit('open', { status: 200, message: '考生已退出房间', data: { examinee: '' } });
+        io.to(TOKEN).emit('open', {
+          status: 200,
+          message: '考生已退出房间',
+          data: {
+            examinee: ''
+          }
+        });
       })
     })
-  else io.to(socket.id).emit('open', { status: 500, message: '连接不存在或已被连接' });
+  else io.to(socket.id).emit('open', {
+    status: 500,
+    message: '连接不存在或已被连接'
+  });
 });
 
 /**
